@@ -1,0 +1,68 @@
+# Sample configuration file for gh-multi-manager
+# Usage: gh-multi --config ./examples/sample_config.yaml <command>
+
+# --- General settings ---
+general:
+  # Working directory where all repos will be cloned/accessed
+  workspace: ~/my-github-workspace
+
+  # GitHub token (optional, but recommended for private repos and higher rate limits)
+  # Can also be set via environment variable GITHUB_TOKEN
+  token: ghp_your_personal_access_token_here
+
+# --- Sources: where to fetch repositories ---
+sources:
+  # 1. All public repos of a user
+  - type: user
+    name: octocat
+    include_private: false   # only public (requires token for private)
+
+  # 2. All repos from an organization (including private if token has rights)
+  - type: org
+    name: github
+    include_private: false
+
+  # 3. Specific repositories by full name (user/repo)
+  - type: list
+    repos:
+      - torvalds/linux
+      - nodejs/node
+      - microsoft/vscode
+
+  # 4. Repositories matching a pattern (using regex on name)
+  - type: pattern
+    source_user: facebook
+    pattern: ".*react.*"      # regex to match repo names
+    include_forks: false
+
+# --- Operations settings ---
+operations:
+  # Default branch to use when creating new branches
+  default_base_branch: main
+
+  # Automatically stash changes before pull? (true/false)
+  auto_stash: false
+
+  # Commit message template (supports {repo} placeholder)
+  commit_template: "chore: auto-update {repo}"
+
+  # Parallelism: number of concurrent git operations
+  max_workers: 5
+
+# --- Filters: include/exclude certain repos ---
+filters:
+  exclude_repos:
+    - "test-*"          # wildcard (any repo starting with test-)
+    - "deprecated/.*"   # regex pattern
+  exclude_topics:
+    - archive
+    - wip
+  only_with_topic:
+    - production
+
+# --- Hooks (custom scripts to run before/after operations) ---
+hooks:
+  pre_pull: ./scripts/backup.sh
+  post_pull: ./scripts/notify.sh
+  pre_commit: null
+  post_commit: null
